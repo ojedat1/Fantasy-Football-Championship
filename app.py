@@ -1,22 +1,31 @@
+import os
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Week 17 QB Projections", layout="wide")
 st.title("2025 Week 17 QB Projections (Weeks 1–16 data)")
 
+SAMPLE_PATH = os.path.join("data", "qb_weekly_2025_sample.csv")
+
+uploaded_file = st.file_uploader("Optional: Upload your qb_weekly_2025.csv", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.success("Using uploaded CSV.")
+else:
+    df = pd.read_csv(SAMPLE_PATH)
+    st.info("Using sample dataset (upload a CSV to override).")
+
+
+df["week"] = df["week"].astype(int)
+df["fantasy_points"] = pd.to_numeric(df["fantasy_points"], errors="coerce")
+df["passer_player_name"] = df["passer_player_name"].astype(str)
+df["opponent_team"] = df["opponent_team"].astype(str)
+
+
 LAMBDA = 0.2  # your validated shrinkage factor
 
-@st.cache_data
-def load_data(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path)
-    df["week"] = df["week"].astype(int)
-    df["fantasy_points"] = pd.to_numeric(df["fantasy_points"], errors="coerce")
-    df["passer_player_name"] = df["passer_player_name"].astype(str)
-    return df
 
-# data_path = st.sidebar.text_input("Data file", "qb_weekly_2025.csv")
-data_path = "Practice/qb_weekly_2025.csv"
-df = load_data(data_path)
 
 projection_week = 17
 latest_week = projection_week - 1
